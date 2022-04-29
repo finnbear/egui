@@ -131,16 +131,16 @@ pub struct CodeTheme {
 
 impl Default for CodeTheme {
     fn default() -> Self {
-        Self::dark()
+        Self::dark(12.0)
     }
 }
 
 impl CodeTheme {
     pub fn from_style(style: &egui::Style) -> Self {
         if style.visuals.dark_mode {
-            Self::dark()
+            Self::dark(12.0)
         } else {
-            Self::light()
+            Self::light(12.0)
         }
     }
 
@@ -194,8 +194,8 @@ impl CodeTheme {
 
 #[cfg(not(feature = "syntect"))]
 impl CodeTheme {
-    pub fn dark() -> Self {
-        let font_id = egui::FontId::monospace(12.0);
+    pub fn dark(font_size: f32) -> Self {
+        let font_id = egui::FontId::monospace(font_size);
         use egui::{Color32, TextFormat};
         Self {
             dark_mode: true,
@@ -211,11 +211,10 @@ impl CodeTheme {
     }
 
     pub fn light() -> Self {
-        let font_id = egui::FontId::monospace(12.0);
+        let font_id = egui::FontId::monospace(font_size);
         use egui::{Color32, TextFormat};
         Self {
             dark_mode: false,
-            #[cfg(not(feature = "syntect"))]
             formats: enum_map::enum_map![
                 TokenType::Comment => TextFormat::simple(font_id.clone(), Color32::GRAY),
                 TokenType::Keyword => TextFormat::simple(font_id.clone(), Color32::from_rgb(235, 0, 0)),
