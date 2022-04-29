@@ -148,11 +148,11 @@ impl CodeTheme {
         if ctx.style().visuals.dark_mode {
             ctx.data()
                 .get_persisted(egui::Id::new("dark"))
-                .unwrap_or_else(CodeTheme::dark)
+                .unwrap_or_else(|| CodeTheme::dark(12.0))
         } else {
             ctx.data()
                 .get_persisted(egui::Id::new("light"))
-                .unwrap_or_else(CodeTheme::light)
+                .unwrap_or_else(|| CodeTheme::light(12.0))
         }
     }
 
@@ -258,9 +258,9 @@ impl CodeTheme {
                 });
 
                 let reset_value = if self.dark_mode {
-                    CodeTheme::dark()
+                    CodeTheme::dark(12.0)
                 } else {
-                    CodeTheme::light()
+                    CodeTheme::light(12.0)
                 };
 
                 if ui
