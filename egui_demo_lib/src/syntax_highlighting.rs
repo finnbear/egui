@@ -210,7 +210,7 @@ impl CodeTheme {
         }
     }
 
-    pub fn light() -> Self {
+    pub fn light(font_size: f32) -> Self {
         let font_id = egui::FontId::monospace(font_size);
         use egui::{Color32, TextFormat};
         Self {
