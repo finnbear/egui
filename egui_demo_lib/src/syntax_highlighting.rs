@@ -1,4 +1,5 @@
 use egui::text::LayoutJob;
+use egui::TextStyle;
 
 /// View some code with syntax highlighting and selection.
 pub fn code_view_ui(ui: &mut egui::Ui, mut code: &str) {
@@ -124,6 +125,8 @@ pub struct CodeTheme {
 
     #[cfg(feature = "syntect")]
     syntect_theme: SyntectTheme,
+    #[cfg(feature = "syntect")]
+    font_size: f32,
 
     #[cfg(not(feature = "syntect"))]
     formats: enum_map::EnumMap<TokenType, egui::TextFormat>,
@@ -131,16 +134,21 @@ pub struct CodeTheme {
 
 impl Default for CodeTheme {
     fn default() -> Self {
-        Self::dark()
+        Self::dark(12.0)
     }
 }
 
 impl CodeTheme {
     pub fn from_style(style: &egui::Style) -> Self {
+        let font_size = style
+            .text_styles
+            .get(TextStyle::Monospace)
+            .map(|f| f.size)
+            .unwrap_or(12.0);
         if style.visuals.dark_mode {
-            Self::dark()
+            Self::dark(font_size)
         } else {
-            Self::light()
+            Self::light(font_size)
         }
     }
 
@@ -148,11 +156,11 @@ impl CodeTheme {
         if ctx.style().visuals.dark_mode {
             ctx.data()
                 .get_persisted(egui::Id::new("dark"))
-                .unwrap_or_else(CodeTheme::dark)
+                .unwrap_or_else(|| CodeTheme::dark(12.0))
         } else {
             ctx.data()
                 .get_persisted(egui::Id::new("light"))
-                .unwrap_or_else(CodeTheme::light)
+                .unwrap_or_else(|| CodeTheme::light(12.0))
         }
     }
 
@@ -167,16 +175,18 @@ impl CodeTheme {
 
 #[cfg(feature = "syntect")]
 impl CodeTheme {
-    pub fn dark() -> Self {
+    pub fn dark(font_size: f32) -> Self {
         Self {
             dark_mode: true,
+            font_size,
             syntect_theme: SyntectTheme::Base16MochaDark,
         }
     }
 
-    pub fn light() -> Self {
+    pub fn light(font_size: f32) -> Self {
         Self {
             dark_mode: false,
+            font_size,
             syntect_theme: SyntectTheme::SolarizedLight,
         }
     }
@@ -194,8 +204,8 @@ impl CodeTheme {
 
 #[cfg(not(feature = "syntect"))]
 impl CodeTheme {
-    pub fn dark() -> Self {
-        let font_id = egui::FontId::monospace(12.0);
+    pub fn dark(font_size: f32) -> Self {
+        let font_id = egui::FontId::monospace(font_size);
         use egui::{Color32, TextFormat};
         Self {
             dark_mode: true,
@@ -210,8 +220,8 @@ impl CodeTheme {
         }
     }
 
-    pub fn light() -> Self {
-        let font_id = egui::FontId::monospace(12.0);
+    pub fn light(font_size: f32) -> Self {
+        let font_id = egui::FontId::monospace(font_size);
         use egui::{Color32, TextFormat};
         Self {
             dark_mode: false,
@@ -259,9 +269,9 @@ impl CodeTheme {
                 });
 
                 let reset_value = if self.dark_mode {
-                    CodeTheme::dark()
+                    CodeTheme::dark(12.0)
                 } else {
-                    CodeTheme::light()
+                    CodeTheme::light(12.0)
                 };
 
                 if ui
@@ -364,7 +374,7 @@ impl Highlighter {
                     leading_space: 0.0,
                     byte_range: as_byte_range(text, range),
                     format: TextFormat {
-                        font_id: egui::FontId::monospace(14.0),
+                        font_id: egui::FontId::monospace(theme.font_size),
                         color: text_color,
                         italics,
                         underline,
